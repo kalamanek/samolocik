@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 package Plane;
-import java.util.ArrayList;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -23,32 +23,13 @@ import javax.swing.Timer;
  *
  * @author Student
  */
-public class PlaneGame extends JComponent implements ActionListener, MouseMotionListener, KeyListener {
-	public class CustomPair {
-	    public int x;
-	    public int y;
-	    CustomPair(){
-	    	this.x =0;
-	    	this.y =0;
-	    }
-	 
-	}
-	int[] tablica = new int[10];
-	CustomPair[] shots = new CustomPair[100];
-
-
-	int shots_amount = 0;
-	
-    public String log;
+public class PlaneGame extends JComponent implements ActionListener, MouseMotionListener, KeyListener{
     private int plane_x;
     private int plane_y;
 
     private int paddlex;
     private int plane_ySpeed;
     private int plane_xSpeed;
-    
-    private int enemy_x;
-    private final int enemy_y;
 
     public int score;
     public int score1;
@@ -57,50 +38,32 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
     public int bestscore1;
     public boolean gameOver, started;
     public Timer timer;
+    
+    public void PlaneGame() {
 
-
-    public PlaneGame() {
-        for(int i = 0 ; i < 100 ; i++){
-        	shots[i] = new CustomPair();
-        }
-        
         this.plane_x = 150;
         this.plane_y = 30;
         this.plane_xSpeed = 20;
         this.plane_ySpeed = 20;
-        this.enemy_y=30;
-        //this.timer = new Timer(); // jeszcze nie dziala odpalanie timera w konstruktorze 
-        //this.timer.start();
-        //timerStart();
+        //timer = new Timer(17, this);
+        //timer.start();
         JOptionPane.showMessageDialog(null, "new plane !");
     }
-
-    public void timerPause() {
-        if (timer.isRunning()) {
+    public void gamePause(){
+        if(timer.isRunning()){
             timer.stop();
-        } else {
+        }else{
             timer.start();
         }
     }
-
-    public void timerStop() {
-        if (timer.isRunning()) {
-            timer.stop();
-        }
-    }
-
-    public void timerStart() {
-        if (!timer.isRunning()) {
-            timer.start();
-        }
-    }
-
+    
+    
     @Override
     public Dimension getPreferredSize() {
 
         return new Dimension(800, 600);
     }
-
+    
     @Override
     protected void paintComponent(Graphics g) {
 
@@ -111,14 +74,7 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
 //draw the paddel
         g.setColor(Color.black);
         g.fillRect(paddlex, 500, 100, 20);
-        
-//draw shots
-        for(int i = 0 ; i < shots_amount ; i++)
-            g.fillOval(shots[i].x, shots[i].y, 15, 30);
-    		
-//draw the enemy
-        
-        
+
 //draw the ball
         g.setColor(Color.RED);
         g.fillOval(plane_x, plane_y, 30, 30);
@@ -144,16 +100,13 @@ g.fillOval(ballx1, bally1, 30, 30);
         g.setFont(new Font("Arial", 8, 50));
 
         if (gameOver) {
+            gamePause();
             g.drawString(String.valueOf(" Best Score :" + scorefinal), 50 / 1 - 15, 200);
-            this.timerStop();
+
         }
     }
 
     public void actionPerformed(ActionEvent e) {
-    	
-    	for(int i = 0 ; i < shots_amount ; i++){
-    		shots[i].y-=5;
-    	}
 
         plane_x = plane_x + plane_xSpeed;
         plane_y = plane_y + plane_ySpeed;
@@ -228,38 +181,29 @@ g.fillOval(ballx1, bally1, 30, 30);
         repaint();
     }
 
-    public void mouseDragged(MouseEvent e) {
+   public void mouseDragged(MouseEvent e) {
     }
 
     public void keyTyped(KeyEvent e) {
-        
+
     }
-// nic nie dzia³a na klikniêcie, log pokazuje ci¹gle null przy zakoñczeniu gry. 
-// p- obs³uga pauzy
-// n- nowa gra po przegranej, póŸniej siê na case przerobi
 
     public void keyPressed(KeyEvent e) {
         char key = e.getKeyChar();
-//reset jest bez sensu bo powinien na nowo ³adowaæ poziom i generowaæ wszystko od nowa
-        if (key == 'n') {
-            this.timer.start();
-            score = 0;
-        }
-        
-        if (e.getKeyCode()==KeyEvent.VK_P) {
-            this.timerPause();
-        }
-        if (key == KeyEvent.VK_SPACE) // strzelanie
-        {
-        	shots[shots_amount].x = paddlex + 25;
-        	shots[shots_amount++].y = 515;
-        }
-
+       if(key=='n')
+       {
+           timer.start();
+           bestscore=0;
+           score=0;
+       }
+       if(key=='p')
+       {
+           gamePause();
+       }
+       repaint();
     }
 
     public void keyReleased(KeyEvent e) {
 
     }
-
-    
 }

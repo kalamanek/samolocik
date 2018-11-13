@@ -1,5 +1,6 @@
 package Plane;
 
+import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
@@ -10,7 +11,6 @@ public class Plane{
 
         JFrame window = new JFrame("Samolocik");
         PlaneGame p;
-        
         p = new PlaneGame();
         window.add(p);
         window.pack();
@@ -18,12 +18,12 @@ public class Plane{
         window.setLocationRelativeTo(null);
         window.setVisible(true);
         window.addMouseMotionListener(p);
-        window.addKeyListener(p);
         p.timer = new Timer(17,p);
-        p.timerStart();
+        p.timer.start();
+        
         //Timer timer = new Timer(17, p);
         //timer.start();
-        
+
     }
 
 }
