@@ -11,7 +11,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -22,10 +21,18 @@ import javax.swing.Timer;
 
 public class PlaneGame extends JComponent implements ActionListener, MouseMotionListener, KeyListener {
     
-    int[] tablica = new int[10];
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	int[] tablica = new int[10];
     CustomPair[] shots = new CustomPair[1000];
+    CustomPair holder = new CustomPair();
 
     int shots_amount = 0;
+    int shot_type = 3;
+    int shots_speed = 3;
+    int cleanShotArrayCounter =0;
     public String log;
     private int plane_x;
     private int plane_y;
@@ -45,14 +52,14 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
     /**
      *
      */
-    public List enemyList;
+    public List<Enemy> enemyList;
 
     public PlaneGame() {
         this.enemyList = new LinkedList<Enemy>();
         this.enemyList.add(new Enemy());
         this.enemyList.add(new Enemy());
         this.enemyList.add(new Enemy());
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             shots[i] = new CustomPair();
         }
         this.plane_x = 150;
@@ -169,15 +176,16 @@ g.fillOval(ballx1, bally1, 30, 30);
             int p = r.nextInt(19) + 1;
             e1 = (Enemy) enemyList.get(j);
             for (int i = 0; i < shots_amount; i++) {
-                shots[i].y -= 5;
+                shots[i].y -= shots_speed;
                 if (shots[i].x >= e1.getPositionX() && shots[i].x+15 <= e1.getPositionX() + 40
                         && shots[i].y <= e1.getPositionY() && shots[i].y+30 <=e1.getPositionY() +40) {
-
+                	shots[i].y = -10;
                     e1.generateNewPosition(p);
                     e1.setPositionY(10);
                 }
             }
         }
+        cleanShotArray();
         plane_x = plane_x + plane_xSpeed;
         plane_y = plane_y + plane_ySpeed;
         for (int j = 0; j < this.enemyList.size(); j++) {
@@ -239,7 +247,7 @@ g.fillOval(ballx1, bally1, 30, 30);
 
         if (scorefinal > bestscore) {
 
-            scorefinal = scorefinal;
+        	bestscore = scorefinal;
 
         } else {
 
@@ -247,20 +255,27 @@ g.fillOval(ballx1, bally1, 30, 30);
             scorefinal = score + score1;
         }
 
-        if (scorefinal > bestscore) {
-
-            scorefinal = scorefinal;
-
-        } else {
-
-            scorefinal = bestscore;
-            scorefinal = score + score1;
-        }
-
         repaint();
     }
+    
+     
+    private void cleanShotArray() {
+    	cleanShotArrayCounter = 0;
+    	for(int i = 0 ; i < shots_amount - cleanShotArrayCounter ; i++ ){
+    		if(shots[i].y < -5){
+    			holder = shots[i];
+    			shots[i] = shots[shots_amount - cleanShotArrayCounter-1] ;
+    			shots[shots_amount - cleanShotArrayCounter-1] = holder;
+    			System.out.println(i + " " + cleanShotArrayCounter + " " +shots_amount + " ");
+        		shots[i].print();
+    			cleanShotArrayCounter++;
+    			i--;
+    		}
+    	}
+    	shots_amount -=cleanShotArrayCounter;
+	}
 
-    public void mouseMoved(MouseEvent e) {
+	public void mouseMoved(MouseEvent e) {
 
         paddlex = e.getX() - 50;
         repaint();
@@ -273,7 +288,6 @@ g.fillOval(ballx1, bally1, 30, 30);
 
     }
 
-    @Override
     public void keyPressed(KeyEvent e) {
         char key = e.getKeyChar();
 //reset jest bez sensu bo powinien na nowo ³adowaæ poziom i generowaæ wszystko od nowa
@@ -290,8 +304,28 @@ g.fillOval(ballx1, bally1, 30, 30);
         }
         if (key == KeyEvent.VK_SPACE) // strzelanie
         {
-            shots[shots_amount].x = paddlex + 25;
-            shots[shots_amount++].y = 515;
+        	switch (shot_type) {
+            case 1:  
+                shots[shots_amount].x = paddlex + 25;
+                shots[shots_amount++].y = 515;
+                     break;
+            case 2:  
+                shots[shots_amount].x = paddlex + 10;
+                shots[shots_amount++].y = 515;
+                shots[shots_amount].x = paddlex + 40;
+                shots[shots_amount++].y = 515;
+                     break;
+            case 3:
+            	shots[shots_amount].x = paddlex + 2;
+	            shots[shots_amount++].y = 515;
+	            shots[shots_amount].x = paddlex + 48;
+	            shots[shots_amount++].y = 515;
+	            shots[shots_amount].x = paddlex + 25;
+	            shots[shots_amount++].y = 505;
+                     break;
+            	default: 
+            		throw new NoSuchMethodError("niema takiego strzelania");
+            }
         }
     }
 
