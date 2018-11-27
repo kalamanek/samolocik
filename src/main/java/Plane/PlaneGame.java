@@ -1,4 +1,3 @@
-
 package Plane;
 
 import java.awt.Color;
@@ -11,7 +10,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -19,13 +17,17 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
-
 public class PlaneGame extends JComponent implements ActionListener, MouseMotionListener, KeyListener {
-    
+
+    private static final long serialVersionUID = 1L;
     int[] tablica = new int[10];
     CustomPair[] shots = new CustomPair[1000];
+    CustomPair holder = new CustomPair();
 
     int shots_amount = 0;
+    int shot_type = 3;
+    int shots_speed = 5;
+    int cleanShotArrayCounter = 0;
     public String log;
     private int plane_x;
     private int plane_y;
@@ -42,19 +44,29 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
     public boolean gameOver, started;
     public Timer timer;
 
+    //gawel
+    public boolean immortal;
+    int iG = 1;
+    public Enemy e1 = new Enemy();
+    public Bonus b1 = new Bonus();
+
     /**
      *
      */
     public List enemyList;
+    public List bonusList;
 
     public PlaneGame() {
         this.enemyList = new LinkedList<Enemy>();
         this.enemyList.add(new Enemy());
         this.enemyList.add(new Enemy());
         this.enemyList.add(new Enemy());
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             shots[i] = new CustomPair();
         }
+
+        this.bonusList = new LinkedList<Bonus>();
+
         this.plane_x = 150;
         this.plane_y = 30;
         this.plane_xSpeed = 20;
@@ -134,9 +146,14 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
             g.fillOval(shots[i].x, shots[i].y, 15, 30);
         }
 //draw the ball
-        g.setColor(Color.RED);
-        g.fillOval(plane_x, plane_y, 30, 30);
-        
+        //g.setColor(Color.RED);
+        //g.fillOval(plane_x, plane_y, 30, 30);
+//draw bonus
+        g.setColor(Color.GREEN);
+        for (int j = 0; j < this.bonusList.size(); j++) {
+            b1 = (Bonus) bonusList.get(j);
+            g.fillOval(b1.getPositionX(), b1.getPositionY(), 40, 40);
+        }
         /*//draw the ball_1
 if (score >= 5) {
 g.setColor(Color.BLACK);
@@ -162,24 +179,60 @@ g.fillOval(ballx1, bally1, 30, 30);
             this.timerStop();
         }
     }
-    Enemy e1 = new Enemy();
 
     public void actionPerformed(ActionEvent e) {
+        //enemy v0.3
+        for (int i = 0; i < shots_amount; i++) {
+            shots[i].y -= shots_speed;
+        }
         for (int j = 0; j < this.enemyList.size(); j++) {
             int p = r.nextInt(19) + 1;
             e1 = (Enemy) enemyList.get(j);
             for (int i = 0; i < shots_amount; i++) {
-                shots[i].y -= 5;
-                if (shots[i].x >= e1.getPositionX() && shots[i].x+15 <= e1.getPositionX() + 40
-                        && shots[i].y <= e1.getPositionY() && shots[i].y+30 <=e1.getPositionY() +40) {
-
+                if (shots[i].x >= e1.getPositionX() && shots[i].x <= e1.getPositionX() + 40
+                        && shots[i].y <= e1.getPositionY() + 40 && shots[i].y >= e1.getPositionY() ) {
+                    shots[i].y = -10;
+                    score++;
                     e1.generateNewPosition(p);
-                    e1.setPositionY(10);
+                    e1.setPositionY(r.nextInt(10) - 500);
+                    if (enemyList.size() < 50) {
+                        this.enemyList.add(new Enemy());
+                    }
                 }
             }
         }
+        //bonus
+        for (int j = 0; j < this.bonusList.size(); j++) {
+            b1 = (Bonus) bonusList.get(j);
+            b1.setPositionY(b1.getPositionY() + 1);
+        }
+
+        //strzelanie v1.0
+        cleanShotArray();
         plane_x = plane_x + plane_xSpeed;
         plane_y = plane_y + plane_ySpeed;
+
+        for (int j = 0; j < this.enemyList.size(); j++) {
+            e1 = (Enemy) enemyList.get(j);
+            e1.setPositionY(e1.getPositionY() + 1);
+        }
+        //~Kuba: do poprawienia, braklo czasu na zajeciach. PóŸniej zoptmalizuje
+        /*for (int j = 0; j < this.enemyList.size(); j++) {
+            e1 = (Enemy) enemyList.get(j);
+            for (int i = 0; i < this.enemyList.size(); i++) {
+                Enemy e2 = (Enemy) enemyList.get(i);
+                if(e1.noCollision(e2))
+                {
+                    int p = r.nextInt(19) + 1;
+                    e2.generateNewPosition(p);
+                    e2.setPositionY(r.nextInt(10) - 100);
+                }
+            }
+        }*/
+
+        plane_x = plane_x + plane_xSpeed;
+        plane_y = plane_y + plane_ySpeed;
+        //rysowanie przeciwników
         for (int j = 0; j < this.enemyList.size(); j++) {
             e1 = (Enemy) enemyList.get(j);
             e1.setPositionY(e1.getPositionY() + 1);
@@ -194,24 +247,48 @@ g.fillOval(ballx1, bally1, 30, 30);
 
         }
 
-        if (plane_y >= 700) {
+        // if (plane_y >= 700) {
+        //score++;
+        if (score == iG * 10) {
+            iG++;
+            this.bonusList.add(new Bonus());
+        }
+        //plane_y = 30;
+        //}
 
-            score++;
-            plane_y = 30;
+        //trafienie na bonusie
+        for (int j = 0; j < this.bonusList.size(); j++) {
+            b1 = (Bonus) bonusList.get(j);
+
+            //zdobycie bonusu
+            if (b1.getPositionX() >= paddlex && b1.getPositionX() <= paddlex + 100 && b1.getPositionY() >= 475 && b1.getPositionY() <= 500) {
+                bonusList.clear();
+                immortal = true;
+            }
+        }
+        for (int i = 0; i < this.enemyList.size(); i++) {
+            e1 = (Enemy) enemyList.get(i);
+            if (e1.getPositionX() >= paddlex && e1.getPositionX() <= paddlex + 100 && e1.getPositionY() >= 475 && e1.getPositionY() <= 500 && immortal == false) {
+                score = 0;
+                gameOver = true;
+            }
+            if (e1.getPositionX() >= paddlex && e1.getPositionX() <= paddlex + 100 && e1.getPositionY() >= 475 && e1.getPositionY() <= 500 && immortal == true) {
+                e1.setPositionY(r.nextInt(10) - 100);
+                score++;
+                immortal = false;
+            }
 
         }
-        if (e1.getPositionY() >= 700) {
-            e1.setPositionX(r.nextInt(700) + 30);
-            e1.setPositionY(30);
+        //rysiwanie wroga jeœli nie zestrzelimy go
+        for (int j = 0; j < this.enemyList.size(); j++) {
+            e1 = (Enemy) enemyList.get(j);
+            if (e1.getPositionY() >= 700) {
+                int p = r.nextInt(19) + 1;
+                e1.generateNewPosition(p);
+                e1.setPositionY(r.nextInt(10) - 100);
+            }
         }
 
-        if (e1.getPositionX() >= paddlex && e1.getPositionX() <= paddlex + 100 && e1.getPositionY() >= 475 && e1.getPositionY() <= 500) {
-
-            score = 0;
-            e1.setPositionY(30);
-            gameOver = true;
-
-        }
 // Window up
         if (plane_y <= 0) {
 
@@ -260,10 +337,29 @@ g.fillOval(ballx1, bally1, 30, 30);
         repaint();
     }
 
+    private void cleanShotArray() {
+        cleanShotArrayCounter = 0;
+        for (int i = 0; i < shots_amount - cleanShotArrayCounter; i++) {
+            if (shots[i].y < -5) {
+                holder = shots[i];
+                shots[i] = shots[shots_amount - cleanShotArrayCounter - 1];
+                shots[shots_amount - cleanShotArrayCounter - 1] = holder;
+                System.out.println(i + " " + cleanShotArrayCounter + " " + shots_amount + " ");
+                shots[i].print();
+                cleanShotArrayCounter++;
+                i--;
+            }
+        }
+        shots_amount -= cleanShotArrayCounter;
+    }
+
     public void mouseMoved(MouseEvent e) {
 
-        paddlex = e.getX() - 50;
-        repaint();
+        if (timer.isRunning()) {
+            paddlex = e.getX() - 50;
+            repaint();
+        }
+
     }
 
     public void mouseDragged(MouseEvent e) {
@@ -279,9 +375,17 @@ g.fillOval(ballx1, bally1, 30, 30);
 //reset jest bez sensu bo powinien na nowo ³adowaæ poziom i generowaæ wszystko od nowa
         if (key == 'n') {
             if (!this.timer.isRunning()) {
-                this.timer.start();
                 gameOver = false;
                 score = 0;
+                enemyList.clear();
+                cleanShotArray();
+                this.enemyList.add(new Enemy());
+                this.enemyList.add(new Enemy());
+                this.enemyList.add(new Enemy());
+                this.enemyList.add(new Enemy());
+                this.enemyList.add(new Enemy());
+                this.enemyList.add(new Enemy());
+                this.timer.start();
             }
         }
 
@@ -290,8 +394,28 @@ g.fillOval(ballx1, bally1, 30, 30);
         }
         if (key == KeyEvent.VK_SPACE) // strzelanie
         {
-            shots[shots_amount].x = paddlex + 25;
-            shots[shots_amount++].y = 515;
+            switch (shot_type) {
+                case 1:
+                    shots[shots_amount].x = paddlex + 25;
+                    shots[shots_amount++].y = 515;
+                    break;
+                case 2:
+                    shots[shots_amount].x = paddlex + 10;
+                    shots[shots_amount++].y = 515;
+                    shots[shots_amount].x = paddlex + 40;
+                    shots[shots_amount++].y = 515;
+                    break;
+                case 3:
+                    shots[shots_amount].x = paddlex + 2;
+                    shots[shots_amount++].y = 515;
+                    shots[shots_amount].x = paddlex + 48;
+                    shots[shots_amount++].y = 515;
+                    shots[shots_amount].x = paddlex + 25;
+                    shots[shots_amount++].y = 505;
+                    break;
+                default:
+                    throw new NoSuchMethodError("niema takiego strzelania");
+            }
         }
     }
 

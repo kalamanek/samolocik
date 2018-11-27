@@ -19,8 +19,9 @@ public class Enemy {
     private int enemy_y;
     public Random r = new Random();
     public Enemy(){
-        this.enemy_y = 30;
-        this.enemy_x = r.nextInt(19) + 1;
+        this.enemy_y = (r.nextInt(10) - 500);
+        int p = r.nextInt(19) + 1;
+        generateNewPosition(p);
     }
     
     public int getPositionX(){
@@ -64,5 +65,18 @@ public class Enemy {
             case 19 : x=740; break;      
         }
         this.setPositionX(x);
+    }
+    
+    public boolean noCollision(Enemy second)
+    {
+        if(this.enemy_x == second.enemy_x)
+        { 
+            if(this.enemy_y >= second.enemy_y && this.enemy_y <= second.enemy_y + 42)
+            {
+                return false;
+            }
+            
+        }
+        return true;
     }
 }

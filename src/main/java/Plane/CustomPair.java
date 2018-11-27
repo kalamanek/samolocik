@@ -18,5 +18,12 @@ public class CustomPair {
             this.x = 0;
             this.y = 0;
         }
+        CustomPair(CustomPair a) {
+        	this.x =a.x;
+        	this.y =a.y;
+        }
+        public void print(){
+			System.out.println(this.x + " " + this.y);
+        }
 
     }
