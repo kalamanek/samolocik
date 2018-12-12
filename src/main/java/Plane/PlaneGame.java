@@ -20,7 +20,7 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
 
     Shooting sh = new Shooting();
     Time t1 = new Time();
-    int shot_type = 3;
+    int shot_type = 1;
     int shots_speed = 5;
     private int plane_x;
     private int plane_y;
@@ -37,11 +37,15 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
     //gawel
     public boolean immortal;
     int iG = 1;
+    private int shotsBonusFrequency = 5;
+    private int shotsBonusCounter = 1;
     public Enemy e1 = new Enemy();
     public Bonus b1 = new Bonus();
+    public Bonus shotBonus = new Bonus();
     
     public List enemyList;
     public List bonusList;
+    public List shotsUpgrade;
 
     public PlaneGame() {
         this.enemyList = new LinkedList<Enemy>();
@@ -53,6 +57,7 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
         }
 
         this.bonusList = new LinkedList<Bonus>();
+        this.shotsUpgrade = new LinkedList<Bonus>();
 
         this.plane_x = 150;
         this.plane_y = 30;
@@ -118,6 +123,11 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
             b1 = (Bonus) bonusList.get(j);
             g.fillOval(b1.getPositionX(), b1.getPositionY(), 40, 40);
         }
+        g.setColor(Color.BLUE);
+        for (int j = 0; j < this.shotsUpgrade.size(); j++) {
+        	shotBonus = (Bonus) shotsUpgrade.get(j);
+            g.fillOval(shotBonus.getPositionX(), shotBonus.getPositionY(), 40, 40);
+        }
         //draw the ball_1
 if (score >= 5) {
 g.setColor(Color.BLACK);
@@ -169,6 +179,10 @@ g.setColor(Color.BLACK);
             b1 = (Bonus) bonusList.get(j);
             b1.setPositionY(b1.getPositionY() + 1);
         }
+        for (int j = 0; j < this.shotsUpgrade.size(); j++) {
+            shotBonus = (Bonus) shotsUpgrade.get(j);
+            shotBonus.setPositionY(shotBonus.getPositionY() + 3);
+        }
 
         //strzelanie v1.0
         sh.cleanShotArray();
@@ -213,6 +227,11 @@ g.setColor(Color.BLACK);
             iG++;
             this.bonusList.add(new Bonus());
         }
+        
+        if (score == shotsBonusFrequency * shotsBonusCounter  && shot_type < 3) {
+        	shotsBonusCounter++;
+            this.shotsUpgrade.add(new Bonus());
+        }
       
         //trafienie na bonusie
         for (int j = 0; j < this.bonusList.size(); j++) {
@@ -222,6 +241,15 @@ g.setColor(Color.BLACK);
             if (b1.getPositionX() >= paddlex && b1.getPositionX() <= paddlex + 100 && b1.getPositionY() >= 475 && b1.getPositionY() <= 500) {
                 bonusList.clear();
                 immortal = true;
+            }
+        }
+        for (int j = 0; j < this.shotsUpgrade.size(); j++) {
+            shotBonus = (Bonus) shotsUpgrade.get(j);
+
+            //zdobycie bonusu
+            if (shotBonus.getPositionX() >= paddlex && shotBonus.getPositionX() <= paddlex + 100 && shotBonus.getPositionY() >= 475 && shotBonus.getPositionY() <= 500) {
+            	shotsUpgrade.clear();
+            	shot_type++;
             }
         }
         for (int i = 0; i < this.enemyList.size(); i++) {
@@ -310,7 +338,6 @@ g.setColor(Color.BLACK);
         
     }
 
-    @Override
     public void keyPressed(KeyEvent e) {
         char key = e.getKeyChar();
 //reset jest bez sensu bo powinien na nowo ³adowaæ poziom i generowaæ wszystko od nowa
