@@ -15,23 +15,15 @@ import java.util.List;
 import java.util.Random;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
-import javax.swing.Timer;
 
 public class PlaneGame extends JComponent implements ActionListener, MouseMotionListener, KeyListener {
 
-    private static final long serialVersionUID = 1L;
-    int[] tablica = new int[10];
-    CustomPair[] shots = new CustomPair[1000];
-    CustomPair holder = new CustomPair();
-
-    int shots_amount = 0;
+    Shooting sh = new Shooting();
+    Time t1 = new Time();
     int shot_type = 3;
     int shots_speed = 5;
-    int cleanShotArrayCounter = 0;
-    public String log;
     private int plane_x;
     private int plane_y;
-
     private int paddlex;
     private int plane_ySpeed;
     private int plane_xSpeed;
@@ -41,18 +33,13 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
     private int scorefinal;
     public int bestscore;
     public int bestscore1;
-    public boolean gameOver, started;
-    public Timer timer;
-
+    public boolean gameOver;
     //gawel
     public boolean immortal;
     int iG = 1;
     public Enemy e1 = new Enemy();
     public Bonus b1 = new Bonus();
-
-    /**
-     *
-     */
+    
     public List enemyList;
     public List bonusList;
 
@@ -62,7 +49,7 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
         this.enemyList.add(new Enemy());
         this.enemyList.add(new Enemy());
         for (int i = 0; i < 1000; i++) {
-            shots[i] = new CustomPair();
+            sh.shots[i] = new CustomPair();
         }
 
         this.bonusList = new LinkedList<Bonus>();
@@ -71,32 +58,9 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
         this.plane_y = 30;
         this.plane_xSpeed = 20;
         this.plane_ySpeed = 20;
-        //this.timer = new Timer(); // jeszcze nie dziala odpalanie timera w konstruktorze 
-        //this.timer.start();
-        //timerStart();
         JOptionPane.showMessageDialog(null, "new plane !");
     }
-
-    public void timerPause() {
-        if (timer.isRunning()) {
-            timer.stop();
-        } else {
-            timer.start();
-        }
-    }
-
-    public void timerStop() {
-        if (timer.isRunning()) {
-            timer.stop();
-        }
-    }
-
-    public void timerStart() {
-        if (!timer.isRunning()) {
-            timer.start();
-        }
-    }
-
+    
     @Override
     public Dimension getPreferredSize() {
 
@@ -130,7 +94,7 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
         g.fillRect(740, 0, 40, 600);
 
 //koniec do usuniecia
-//draw the paddel
+//draw the paddle
         g.setColor(Color.black);
         g.fillRect(paddlex, 500, 100, 20);
 
@@ -142,8 +106,8 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
         }
         //g.fillOval(e1.getPositionX(), e1.getPositionY(), 40, 40);
 //draw shots
-        for (int i = 0; i < shots_amount; i++) {
-            g.fillOval(shots[i].x, shots[i].y, 15, 30);
+        for (int i = 0; i < sh.shots_amount; i++) {
+            g.fillOval(sh.shots[i].x, sh.shots[i].y, 15, 30);
         }
 //draw the ball
         //g.setColor(Color.RED);
@@ -154,12 +118,11 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
             b1 = (Bonus) bonusList.get(j);
             g.fillOval(b1.getPositionX(), b1.getPositionY(), 40, 40);
         }
-        /*//draw the ball_1
+        //draw the ball_1
 if (score >= 5) {
 g.setColor(Color.BLACK);
-g.fillOval(ballx1, bally1, 30, 30);
 
-}*/
+}
 //score
         if (score >= 5) {
             g.setColor(Color.red);
@@ -176,22 +139,22 @@ g.fillOval(ballx1, bally1, 30, 30);
 
         if (gameOver) {
             g.drawString(String.valueOf(" Best Score :" + scorefinal), 50 / 1 - 15, 200);
-            this.timerStop();
+            this.t1.timerStop();
         }
     }
 
     public void actionPerformed(ActionEvent e) {
         //enemy v0.3
-        for (int i = 0; i < shots_amount; i++) {
-            shots[i].y -= shots_speed;
+        for (int i = 0; i < sh.shots_amount; i++) {
+            sh.shots[i].y -= shots_speed;
         }
         for (int j = 0; j < this.enemyList.size(); j++) {
             int p = r.nextInt(19) + 1;
             e1 = (Enemy) enemyList.get(j);
-            for (int i = 0; i < shots_amount; i++) {
-                if (shots[i].x >= e1.getPositionX() && shots[i].x <= e1.getPositionX() + 40
-                        && shots[i].y <= e1.getPositionY() + 40 && shots[i].y >= e1.getPositionY() ) {
-                    shots[i].y = -10;
+            for (int i = 0; i < sh.shots_amount; i++) {
+                if (sh.shots[i].x >= e1.getPositionX() && sh.shots[i].x <= e1.getPositionX() + 40
+                        && sh.shots[i].y <= e1.getPositionY() + 40 && sh.shots[i].y >= e1.getPositionY() ) {
+                    sh.shots[i].y = -10;
                     score++;
                     e1.generateNewPosition(p);
                     e1.setPositionY(r.nextInt(10) - 500);
@@ -208,7 +171,7 @@ g.fillOval(ballx1, bally1, 30, 30);
         }
 
         //strzelanie v1.0
-        cleanShotArray();
+        sh.cleanShotArray();
         plane_x = plane_x + plane_xSpeed;
         plane_y = plane_y + plane_ySpeed;
 
@@ -246,16 +209,11 @@ g.fillOval(ballx1, bally1, 30, 30);
             gameOver = true;
 
         }
-
-        // if (plane_y >= 700) {
-        //score++;
         if (score == iG * 10) {
             iG++;
             this.bonusList.add(new Bonus());
         }
-        //plane_y = 30;
-        //}
-
+      
         //trafienie na bonusie
         for (int j = 0; j < this.bonusList.size(); j++) {
             b1 = (Bonus) bonusList.get(j);
@@ -279,7 +237,7 @@ g.fillOval(ballx1, bally1, 30, 30);
             }
 
         }
-        //rysiwanie wroga jeœli nie zestrzelimy go
+        //rysowanie wroga jeœli nie zestrzelimy go
         for (int j = 0; j < this.enemyList.size(); j++) {
             e1 = (Enemy) enemyList.get(j);
             if (e1.getPositionY() >= 700) {
@@ -335,38 +293,21 @@ g.fillOval(ballx1, bally1, 30, 30);
         }
 
         repaint();
-    }
-
-    private void cleanShotArray() {
-        cleanShotArrayCounter = 0;
-        for (int i = 0; i < shots_amount - cleanShotArrayCounter; i++) {
-            if (shots[i].y < -5) {
-                holder = shots[i];
-                shots[i] = shots[shots_amount - cleanShotArrayCounter - 1];
-                shots[shots_amount - cleanShotArrayCounter - 1] = holder;
-                System.out.println(i + " " + cleanShotArrayCounter + " " + shots_amount + " ");
-                shots[i].print();
-                cleanShotArrayCounter++;
-                i--;
-            }
         }
-        shots_amount -= cleanShotArrayCounter;
-    }
 
     public void mouseMoved(MouseEvent e) {
 
-        if (timer.isRunning()) {
+        if (t1.timer.isRunning()) {
             paddlex = e.getX() - 50;
             repaint();
         }
-
     }
 
     public void mouseDragged(MouseEvent e) {
     }
 
     public void keyTyped(KeyEvent e) {
-
+        
     }
 
     @Override
@@ -374,53 +315,51 @@ g.fillOval(ballx1, bally1, 30, 30);
         char key = e.getKeyChar();
 //reset jest bez sensu bo powinien na nowo ³adowaæ poziom i generowaæ wszystko od nowa
         if (key == 'n') {
-            if (!this.timer.isRunning()) {
+            if (!this.t1.timer.isRunning()) {
                 gameOver = false;
                 score = 0;
                 enemyList.clear();
-                cleanShotArray();
+                sh.cleanShotArray();
                 this.enemyList.add(new Enemy());
                 this.enemyList.add(new Enemy());
                 this.enemyList.add(new Enemy());
                 this.enemyList.add(new Enemy());
                 this.enemyList.add(new Enemy());
                 this.enemyList.add(new Enemy());
-                this.timer.start();
+                this.t1.timer.start();
             }
         }
 
         if (e.getKeyCode() == KeyEvent.VK_P) {
-            this.timerPause();
+            this.t1.timerPause();
         }
         if (key == KeyEvent.VK_SPACE) // strzelanie
         {
             switch (shot_type) {
                 case 1:
-                    shots[shots_amount].x = paddlex + 25;
-                    shots[shots_amount++].y = 515;
+                    sh.shots[sh.shots_amount].x = paddlex + 25;
+                    sh.shots[sh.shots_amount++].y = 515;
                     break;
                 case 2:
-                    shots[shots_amount].x = paddlex + 10;
-                    shots[shots_amount++].y = 515;
-                    shots[shots_amount].x = paddlex + 40;
-                    shots[shots_amount++].y = 515;
+                    sh.shots[sh.shots_amount].x = paddlex + 10;
+                    sh.shots[sh.shots_amount++].y = 515;
+                    sh.shots[sh.shots_amount].x = paddlex + 40;
+                    sh.shots[sh.shots_amount++].y = 515;
                     break;
                 case 3:
-                    shots[shots_amount].x = paddlex + 2;
-                    shots[shots_amount++].y = 515;
-                    shots[shots_amount].x = paddlex + 48;
-                    shots[shots_amount++].y = 515;
-                    shots[shots_amount].x = paddlex + 25;
-                    shots[shots_amount++].y = 505;
+                    sh.shots[sh.shots_amount].x = paddlex + 2;
+                    sh.shots[sh.shots_amount++].y = 515;
+                    sh.shots[sh.shots_amount].x = paddlex + 48;
+                    sh.shots[sh.shots_amount++].y = 515;
+                    sh.shots[sh.shots_amount].x = paddlex + 25;
+                    sh.shots[sh.shots_amount++].y = 505;
                     break;
                 default:
                     throw new NoSuchMethodError("niema takiego strzelania");
             }
         }
     }
-
     public void keyReleased(KeyEvent e) {
 
     }
-
 }
