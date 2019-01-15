@@ -1,12 +1,13 @@
 package Plane;
 
+import java.io.IOException;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
 public class Plane{
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         JFrame window = new JFrame("Samolocik");
         PlaneGame p;

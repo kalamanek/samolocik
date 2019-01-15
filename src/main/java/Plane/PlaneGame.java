@@ -10,9 +10,13 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
@@ -24,7 +28,7 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
     int shots_speed = 5;
     private int plane_x;
     private int plane_y;
-    private int paddlex;
+    private int paddlex=400,paddley=500;
     private int plane_ySpeed;
     private int plane_xSpeed;
     public Random r = new Random();
@@ -47,7 +51,18 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
     public List bonusList;
     public List shotsUpgrade;
 
-    public PlaneGame() {
+    public BufferedImage image,imageEnemy, imageShots, imageBackground;
+    public PlaneGame() throws IOException {
+        
+            System.out.println(System.getProperty("user.dir") + "\\spaceship2.png");
+        try{
+            image = ImageIO.read( new File("spaceship2.png" ));
+            imageEnemy = ImageIO.read( new File("spaceEnemy.png" ));
+            imageShots = ImageIO.read( new File("bullet_1.png" ));
+            imageBackground = ImageIO.read( new File("background.jpg"));
+        }catch(IOException e){
+            throw e;
+        }
         this.enemyList = new LinkedList<Enemy>();
         this.enemyList.add(new Enemy());
         this.enemyList.add(new Enemy());
@@ -76,16 +91,17 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
     protected void paintComponent(Graphics g) {
 
 //draw the sky
-        g.setColor(Color.cyan);
-        g.fillRect(0, 0, 800, 600);
-
+        //g.setColor(Color.black);
+        //.fillRect(0, 0, 800, 600);
+        g.drawImage(imageBackground, 0, 0, this);
+        
 //testuje mape, potem wyrzuce ~Kuba
-        g.setColor(Color.yellow);
+        //g.setColor(Color.yellow);
         //panele boczne
-        g.fillRect(0, 0, 20, 600);
-        g.fillRect(780, 0, 20, 600);
+        //g.fillRect(0, 0, 20, 600);
+        //g.fillRect(780, 0, 20, 600);
         // "tor" przeciwnika
-        g.setColor(Color.pink);
+        /*g.setColor(Color.pink);
         g.fillRect(20, 0, 40, 600);
         g.fillRect(100, 0, 40, 600);
         g.fillRect(180, 0, 40, 600);
@@ -96,23 +112,25 @@ public class PlaneGame extends JComponent implements ActionListener, MouseMotion
         g.fillRect(500, 0, 40, 600);
         g.fillRect(580, 0, 40, 600);
         g.fillRect(660, 0, 40, 600);
-        g.fillRect(740, 0, 40, 600);
+        g.fillRect(740, 0, 40, 600);*/
 
 //koniec do usuniecia
 //draw the paddle
-        g.setColor(Color.black);
-        g.fillRect(paddlex, 500, 100, 20);
-
+        //g.setColor(Color.black);
+        //g.fillRect(paddlex, 500, 100, 20);
+        g.drawImage(image, paddlex, paddley, this);
 //draw the enemy
         g.setColor(Color.black);
         for (int j = 0; j < this.enemyList.size(); j++) {
             e1 = (Enemy) enemyList.get(j);
-            g.fillOval(e1.getPositionX(), e1.getPositionY(), 40, 40);
+            //g.fillOval(e1.getPositionX(), e1.getPositionY(), 40, 40);
+            g.drawImage(imageEnemy, e1.getPositionX(), e1.getPositionY(), this);
         }
         //g.fillOval(e1.getPositionX(), e1.getPositionY(), 40, 40);
 //draw shots
         for (int i = 0; i < sh.shots_amount; i++) {
-            g.fillOval(sh.shots[i].x, sh.shots[i].y, 15, 30);
+            //g.fillOval(sh.shots[i].x, sh.shots[i].y, 15, 30);
+            g.drawImage(imageShots, sh.shots[i].x, sh.shots[i].y, this);
         }
 //draw the ball
         //g.setColor(Color.RED);
@@ -168,7 +186,7 @@ g.setColor(Color.BLACK);
                     score++;
                     e1.generateNewPosition(p);
                     e1.setPositionY(r.nextInt(10) - 500);
-                    if (enemyList.size() < 50) {
+                    if (enemyList.size() <= 20) {
                         this.enemyList.add(new Enemy());
                     }
                 }
@@ -216,7 +234,7 @@ g.setColor(Color.BLACK);
         }
 
 // Window Down
-        if (plane_x >= paddlex && plane_x <= paddlex + 100 && plane_y >= 475 && plane_y <= 500) {
+        if (plane_x >= paddlex && plane_x <= paddlex + 100 && plane_y >= paddley-25 && plane_y <= paddley) {
 
             score = 0;
             plane_y = 30;
@@ -238,7 +256,7 @@ g.setColor(Color.BLACK);
             b1 = (Bonus) bonusList.get(j);
 
             //zdobycie bonusu
-            if (b1.getPositionX() >= paddlex && b1.getPositionX() <= paddlex + 100 && b1.getPositionY() >= 475 && b1.getPositionY() <= 500) {
+            if (b1.getPositionX() >= paddlex && b1.getPositionX() <= paddlex + 100 && b1.getPositionY() >= paddley-25 && b1.getPositionY() <= paddley) {
                 bonusList.clear();
                 immortal = true;
             }
@@ -247,18 +265,18 @@ g.setColor(Color.BLACK);
             shotBonus = (Bonus) shotsUpgrade.get(j);
 
             //zdobycie bonusu
-            if (shotBonus.getPositionX() >= paddlex && shotBonus.getPositionX() <= paddlex + 100 && shotBonus.getPositionY() >= 475 && shotBonus.getPositionY() <= 500) {
+            if (shotBonus.getPositionX() >= paddlex && shotBonus.getPositionX() <= paddlex + 100 && shotBonus.getPositionY() >= paddley-25 && shotBonus.getPositionY() <= paddley) {
             	shotsUpgrade.clear();
             	shot_type++;
             }
         }
         for (int i = 0; i < this.enemyList.size(); i++) {
             e1 = (Enemy) enemyList.get(i);
-            if (e1.getPositionX() >= paddlex && e1.getPositionX() <= paddlex + 100 && e1.getPositionY() >= 475 && e1.getPositionY() <= 500 && immortal == false) {
+            if (e1.getPositionX() >= paddlex && e1.getPositionX() <= paddlex + 100 && e1.getPositionY() >= paddley-25 && e1.getPositionY() <= paddley && immortal == false) {
                 score = 0;
                 gameOver = true;
             }
-            if (e1.getPositionX() >= paddlex && e1.getPositionX() <= paddlex + 100 && e1.getPositionY() >= 475 && e1.getPositionY() <= 500 && immortal == true) {
+            if (e1.getPositionX() >= paddlex && e1.getPositionX() <= paddlex + 100 && e1.getPositionY() >= paddley-25 && e1.getPositionY() <= paddley && immortal == true) {
                 e1.setPositionY(r.nextInt(10) - 100);
                 score++;
                 immortal = false;
@@ -326,9 +344,22 @@ g.setColor(Color.BLACK);
     public void mouseMoved(MouseEvent e) {
 
         if (t1.timer.isRunning()) {
-            paddlex = e.getX() - 50;
-            repaint();
+            if (e.getX() < 715 && e.getX() > 30) {
+
+                paddlex = e.getX() - 50;
+                repaint();
+            }
+
+            if (e.getY() < 610 && e.getY() > 420) {
+
+                paddley = e.getY() - 50;
+                repaint();
+            }
+        }else
+        {
+            e.getLocationOnScreen();
         }
+
     }
 
     public void mouseDragged(MouseEvent e) {
@@ -344,9 +375,12 @@ g.setColor(Color.BLACK);
         if (key == 'n') {
             if (!this.t1.timer.isRunning()) {
                 gameOver = false;
+                shot_type=1;
+                shotsUpgrade.clear();
                 score = 0;
                 enemyList.clear();
                 sh.cleanShotArray();
+                this.bonusList.clear();
                 this.enemyList.add(new Enemy());
                 this.enemyList.add(new Enemy());
                 this.enemyList.add(new Enemy());
@@ -364,22 +398,22 @@ g.setColor(Color.BLACK);
         {
             switch (shot_type) {
                 case 1:
-                    sh.shots[sh.shots_amount].x = paddlex + 25;
-                    sh.shots[sh.shots_amount++].y = 515;
+                    sh.shots[sh.shots_amount].x = paddlex + 64;
+                    sh.shots[sh.shots_amount++].y = paddley - 35;
                     break;
                 case 2:
-                    sh.shots[sh.shots_amount].x = paddlex + 10;
-                    sh.shots[sh.shots_amount++].y = 515;
                     sh.shots[sh.shots_amount].x = paddlex + 40;
-                    sh.shots[sh.shots_amount++].y = 515;
+                    sh.shots[sh.shots_amount++].y = paddley-35;
+                    sh.shots[sh.shots_amount].x = paddlex + 90;
+                    sh.shots[sh.shots_amount++].y = paddley-35;
                     break;
                 case 3:
-                    sh.shots[sh.shots_amount].x = paddlex + 2;
-                    sh.shots[sh.shots_amount++].y = 515;
-                    sh.shots[sh.shots_amount].x = paddlex + 48;
-                    sh.shots[sh.shots_amount++].y = 515;
-                    sh.shots[sh.shots_amount].x = paddlex + 25;
-                    sh.shots[sh.shots_amount++].y = 505;
+                    sh.shots[sh.shots_amount].x = paddlex + 30;
+                    sh.shots[sh.shots_amount++].y = paddley-35;
+                    sh.shots[sh.shots_amount].x = paddlex + 65;
+                    sh.shots[sh.shots_amount++].y = paddley-55;
+                    sh.shots[sh.shots_amount].x = paddlex + 100;
+                    sh.shots[sh.shots_amount++].y = paddley-35;
                     break;
                 default:
                     throw new NoSuchMethodError("niema takiego strzelania");
